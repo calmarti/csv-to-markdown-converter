@@ -1,0 +1,20 @@
+{
+  "name": "csv-to-markdown-converter",
+  "version": "1.0.0",
+  "description": "A csv-to-markdown-converter agentic project",
+  "homepage": "https://github.com/calmarti/csv-to-markdown-converter#readme",
+  "bugs": {
+    "url": "https://github.com/calmarti/csv-to-markdown-converter/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/calmarti/csv-to-markdown-converter.git"
+  },
+  "license": "ISC",
+  "author": "Ivan Martinez Calcano",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
