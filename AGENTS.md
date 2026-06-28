@@ -1,200 +1,189 @@
-# Project instructions
+# CSV to Markdown Extractor
 
 ## Project goal
 
-This project converts one article row from an external CSV file into one clean, readable Markdown file 
+This project extracts a single press article from a master CSV file and generates a Markdown file.
 
-The CSV contains press articles. Each row represents one article and the following are the columns relevant to this project:
+The JavaScript tools are responsible for deterministic tasks such as reading the CSV and retrieving article data.
+
+The agent is responsible for selecting the appropriate tool, interpreting the results, generating the Markdown, and presenting it for review.
+
+---
+
+## Project structure
+
+```txt
+csv-to-markdown/
+├── AGENTS.md
+├── README.md
+├── package.json
+├── tools/
+│   ├── find-article.js
+│   └── read-row.js
+└── output/
+```
+
+---
+
+## Tool execution
+
+The project tools are located in:
+
+```txt
+tools/
+```
+
+When a task requires locating or reading an article, the agent must execute the appropriate JavaScript tool instead of implementing the functionality itself.
+
+Do not manually parse the CSV if a project tool exists for the task.
+
+---
+
+## Workflow
+
+When the user requests an article:
+
+1. Determine whether the user identified the article by title, partial title or row number.
+2. Run the appropriate tool.
+3. If multiple articles match, present the matches and ask the user to choose one.
+4. Read the selected row.
+5. Generate a Markdown file using the project's frontmatter template.
+6. Save the Markdown file in `output/`.
+7. Show the generated file to the user for its review
+
+---
+
+## Tool responsibilities
+
+### find-article.js
+
+Responsible only for locating candidate articles.
+
+Input:
+
+* title
+* partial title
+
+Output:
+
+* matching row number or numbers
+* title
+* date
+
+Never generates Markdown.
+
+---
+
+### read-row.js
+
+Responsible only for retrieving one complete article.
+
+Input:
+
+* row number
+
+Output:
 
 * title
 * date
 * content
 
+Never generates Markdown.
 
-## Main workflow
+---
 
-When the user asks to extract, convert, or generate an specific article from the CSV:
+## Agent responsibilities
 
-1. Read the external CSV file.
-2. Locate the requested article by title
-3. If there are multiple plausible matches, show the matches and ask the user to choose.
-4. Extract the article title, date, and full article content.
-5. Generate one Markdown file in `output/` folder.
-6. Use the required YAML frontmatter.
-7. Do not modify the CSV.
-8. Show the path of the created Markdown file.
-9. Show the generated file content to the user so he can review it and aprove it or not
+The agent is responsible for:
 
-## Project structure
+* deciding which tool to run
+* selecting the correct article
+* generating the Markdown
+* applying the frontmatter template
+* preserving the article text
+* choosing the output filename
+* saving the Markdown file
+* presenting the generated file for review
 
-```txt
-extractor-articulos/
-├── AGENTS.md
-├── README.md
-├── package.json
-├── package-lock.json
-├── scripts/
-│   └── extraer-articulo.js
-└── salida/
-    └── articulos/
-```
-
-## Commands
-
-Use the Node script for extraction:
-
-```bash
-node scripts/extraer-articulo.js --titulo "<article title>"
-```
-
-The script should read the CSV path from either:
-
-1. a command-line argument:
-
-```bash
---csv "/absolute/path/to/file.csv"
-```
-
-or
-
-2. an environment variable:
-
-```bash
-CSV_PATH="/absolute/path/to/file.csv"
-```
-
-Prefer the environment variable if already configured.
+---
 
 ## File rules
 
-Allowed to read all the files inside this project.
+The agent may read all files in this project.
 
-Allowed to write:
+The agent may write only inside:
 
 * `output/`
 
-Do not write anywhere else unless the user explicitly asks.
+---
 
-## CSV rules
 
 ## CSV rules
 
 The CSV is read-only.
 
-Never modify, normalize, overwrite, or re-export the CSV.
+Never modify, overwrite or re-export it.
 
-These are the 3 relavant headers:
+The relevant columns are:
 
-- `title`
-- `date`
-- `content`
+* `title`
+* `date`
+* `content`
 
-Ignore `url` header
+Ignore any other columns
 
-If any of these headers is missing, stop and report the problem.
+If any required column is missing, stop and report the problem.
 
 Do not infer alternative column names.
 
-## Output filename rules
+---
 
-Generated Markdown files must go in:
+## Output rules
 
-```txt
-output/
-```
+Generate one Markdown file per article.
 
 Filename format:
 
 ```txt
-title-slug-in-original-language.md
+slug-of-original-article-title-using-only-english-alphabet-letters.md
 ```
-
-Example:
-
+Example of original title:
 ```txt
-la-tercera-vida-de-teodoro-petkoff.md
+Música y petróleo: el sistema del maestro Abreu
+```
+Example of slug:
+```
+musica-y-petroleo-el-sistema-del-maestro-abreu
 ```
 
-Slug rules:
+Use the project's Markdown template exactly. Never invent or omit frontmatter fields.
 
-1. lowercase
-2. remove accents
-3. convert `ñ` to `n`
-4. remove punctuation
-5. replace spaces with hyphens
-6. collapse repeated hyphens
-7. trim leading/trailing hyphens
+Preserve the article text.
 
+Do not summarize, rewrite or interpret the article.
 
-## Markdown output format
-
-Each generated file must use this structure:
-
-```md
----
-titulo: "<article title>"
-fecha: "<YYYY-MM-DD or empty>"
-tipo: "articulo-prensa"
-estado: "fuente"
-origen_csv: "<external CSV path>"
-fila_csv: "<row number if known>"
 ---
 
-# <article title>
+### Date format
 
-<full article content>
-```
-
-Do not summarize the article.
-
-Do not rewrite the article.
-
-Do not correct the author's style.
-
-Only normalize line breaks enough to make the Markdown readable.
-
-## Safety rules
-
-Never modify:
-
-* the external CSV
-* files outside `salida/articulos/`
-* the second brain project
-* already generated Markdown files unless the user explicitly asks to overwrite or regenerate
-
-If a target Markdown file already exists, do not overwrite silently.
-
-Instead, report:
+The CSV date is an ISO-8601 timestamp, for example:
 
 ```txt
-File already exists: <path>
+2023-05-25T12:15:01+02:00
 ```
 
-and ask whether to overwrite, create a new filename, or stop.
+Convert that ISO format into this format:
 
-## Review rules
-
-After creating a Markdown file, always show:
-
-```bash
-git status
-git diff -- salida/articulos/
+```txt
+YYYY-MM-DD
 ```
 
-If the file is untracked and `git diff` does not show it, show the created file path and enough content for review.
+This must be the format used in the generated markdown
 
-The user reviews every generated file manually.
+## Review
 
-## Error handling
+After generating the Markdown file:
 
-If no article matches, say so and suggest using a partial title, exact date, or row number.
-
-If several articles match, show a short numbered list with:
-
-* row number
-* title
-* date
-
-Then wait for the user to choose.
-
-If the article content cell is empty, create no file and report the issue.
+* show the output path
+* show the generated Markdown
+* wait for user approval before any further action
