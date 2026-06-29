@@ -1,12 +1,13 @@
 # CSV to Markdown Extractor
 
+
 ## Project goal
 
 This project extracts a single press article from a master CSV file and generates a Markdown file.
 
 The JavaScript tools are responsible for deterministic tasks such as reading the CSV and retrieving article data.
 
-The agent is responsible for selecting the appropriate tool, interpreting the results, generating the Markdown, and presenting it for review.
+You (the agent) are responsible for selecting the appropriate tool, interpreting the results, generating the Markdown according to the template, and presenting it for review.
 
 ---
 
@@ -18,8 +19,8 @@ csv-to-markdown/
 ├── README.md
 ├── package.json
 ├── tools/
-│   ├── find-article.js
-│   └── read-row.js
+│   ├── search-article.js
+│   └── get-article.js
 └── output/
 ```
 
@@ -33,7 +34,7 @@ The project tools are located in:
 tools/
 ```
 
-When a task requires locating or reading an article, the agent must execute the appropriate JavaScript tool instead of implementing the functionality itself.
+When a task requires locating or reading an article, execute the appropriate JavaScript tool instead of implementing the functionality itself.
 
 Do not manually parse the CSV if a project tool exists for the task.
 
@@ -55,18 +56,38 @@ When the user requests an article:
 
 ## Tool responsibilities
 
-### find-article.js
+### search-article.js
 
 Responsible only for locating candidate articles.
 
 Input:
 
-* title
-* partial title
+* title, passed with `--title`
+* partial title, passed with `--partial-title`
+* path to csv, passed with `--csv`
+
+Examples:
+
+```sh
+node tools/search-article.js --csv /path/to/master.csv --title "Article title"
+```
+```sh
+node tools/search-article.js --csv /path/to/master.csv --partial-title "partial article title"
+```
+
+Matching rules:
+
+* Title and partial-title searches are normalized before comparison.
+* Normalization is case-insensitive, accent-insensitive, and treats punctuation or other non-alphanumeric characters as word separators.
+* `title` must match the normalized CSV title exactly.
+* `partial title` must be contained within the normalized CSV title.
+* When the user provides only a word or fragment of a title, use `--partial-title`, not `--title`.
+* Use `--title` only when the user provides the complete article title.
+
 
 Output:
 
-* matching row number or numbers
+* matching CSV row number(s), counted as CSV record numbers including the header row 
 * title
 * date
 
@@ -74,13 +95,13 @@ Never generates Markdown.
 
 ---
 
-### read-row.js
+### get-article.js
 
 Responsible only for retrieving one complete article.
 
 Input:
 
-* row number
+* CSV row number, counted as the CSV record number including the header row
 
 Output:
 
@@ -136,6 +157,10 @@ If any required column is missing, stop and report the problem.
 
 Do not infer alternative column names.
 
+CSV row numbers refer to CSV record numbers, including the header row. Therefore, the header row is row 1 and the first article row is row 2.
+
+
+
 ---
 
 ## Output rules
@@ -172,13 +197,15 @@ The CSV date is an ISO-8601 timestamp, for example:
 2023-05-25T12:15:01+02:00
 ```
 
-Convert that ISO format into this format:
+Convert that ISO format into the format that will be used in the generated markdown:
 
 ```txt
 YYYY-MM-DD
 ```
 
-This must be the format used in the generated markdown
+
+
+
 
 ## Review
 

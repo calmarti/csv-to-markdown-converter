@@ -5,7 +5,12 @@ import process from 'node:process';
 import { Readable } from 'node:stream';
 import csvParser from 'csv-parser';
 
+//TODO: check if AGENTS.md must explicitly tell the agent the csv path
+//TODO: include markdown template
+//TODO: tools throwing errors: should include rules for handling errors?
+
 function parseArgs(argv) {
+
   const options = {
     csv: null,
     title: null,
