@@ -42,15 +42,34 @@ Do not manually parse the CSV if a project tool exists for the task.
 
 ## Workflow
 
-When the user requests an article:
+The user will request one Markdown file for one press article from a CSV file.
 
-1. Determine whether the user identified the article by title, partial title or row number.
-2. Run the appropriate tool.
-3. If multiple articles match, present the matches and ask the user to choose one.
-4. Read the selected row.
-5. Generate a Markdown file using the project's frontmatter template.
+The user request must include:
+
+* the path to the CSV file
+* one article identifier:
+  * complete title
+  * partial title
+  * CSV row number
+
+If the user does not provide the CSV path, stop and ask the user for the CSV path before running any article tool.
+
+When the user requests an article by complete title or partial title:
+
+1. Run `search-article.js` with the CSV path and title or partial title.
+2. If exactly one article matches, use that article's CSV row number.
+3. If multiple articles match, present all matching article titles, dates, and row numbers, then ask the user to choose one.
+4. After the final article has been selected, run `get-article.js` with the CSV path and selected CSV row number.
+5. Generate a Markdown file using the project's Markdown template.
 6. Save the Markdown file in `output/`.
-7. Show the generated file to the user for its review
+7. Show the generated file to the user for its review.
+
+When the user requests an article by CSV row number:
+
+1. Run `get-article.js` with the CSV path and CSV row number.
+2. Generate a Markdown file using the project's Markdown template.
+3. Save the Markdown file in `output/`.
+4. Show the generated file to the user for its review.
 
 ---
 
@@ -102,6 +121,7 @@ Responsible only for retrieving one complete article.
 Input:
 
 * CSV row number, counted as the CSV record number including the header row
+* path to csv
 
 Output:
 
@@ -160,6 +180,12 @@ Do not infer alternative column names.
 CSV row numbers refer to CSV record numbers, including the header row. Therefore, the header row is row 1 and the first article row is row 2.
 
 
+
+---
+
+## Markdown template
+
+TODO: define the exact Markdown frontmatter and body template here.
 
 ---
 
