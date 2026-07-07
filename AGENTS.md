@@ -185,7 +185,15 @@ CSV row numbers refer to CSV record numbers, including the header row. Therefore
 
 ## Markdown template
 
-TODO: define the exact Markdown frontmatter and body template here.
+```md
+---
+title: "{{title}}"
+date: {{date}}
+publishedIn: {{newspaper}}
+---
+
+{{content}}
+```
 
 ---
 
