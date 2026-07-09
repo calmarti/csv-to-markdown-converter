@@ -141,6 +141,7 @@ The agent is responsible for:
 * selecting the correct article
 * generating the Markdown
 * applying the frontmatter template
+* applying documented frontmatter defaults
 * preserving the article text
 * choosing the output filename
 * saving the Markdown file
@@ -151,10 +152,6 @@ The agent is responsible for:
 ## File rules
 
 The agent may read all files in this project.
-
-The agent may write only inside:
-
-* `output/`
 
 ---
 
@@ -194,6 +191,14 @@ publishedIn: {{newspaper}}
 
 {{content}}
 ```
+
+Template values:
+
+* `title`, `date`, and `content` must come from `get-article.js`.
+* `newspaper` is frontmatter metadata, not a CSV column.
+* Unless the user explicitly provides another newspaper/publication value, set `newspaper` to `El País`.
+* If the user provides another newspaper/publication value, use that exact value for `newspaper`.
+* Do not inspect ignored CSV columns to override this default.
 
 ---
 

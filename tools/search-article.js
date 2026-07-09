@@ -5,7 +5,7 @@ import process from 'node:process';
 import { Readable } from 'node:stream';
 import csvParser from 'csv-parser';
 
-//TODO: include markdown template 
+//TODO: do an early test of the flow
 //TODO: implement get-article tool
 //TODO: tools throwing errors: should include rules for handling errors?
 
