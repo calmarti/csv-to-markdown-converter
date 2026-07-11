@@ -5,16 +5,10 @@ import process from 'node:process';
 import { Readable } from 'node:stream';
 import csvParser from 'csv-parser';
 
-//TODO: do an early test of the flow
-
-//TODO: tools throwing errors: should include rules for handling errors?
-
 function parseArgs(argv) {
-
   const options = {
     csv: null,
-    title: null,
-    partialTitle: null,
+    row: null,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -25,12 +19,8 @@ function parseArgs(argv) {
         options.csv = argv[index + 1] ?? null;
         index += 1;
         break;
-      case '--title':
-        options.title = argv[index + 1] ?? null;
-        index += 1;
-        break;
-      case '--partial-title':
-        options.partialTitle = argv[index + 1] ?? null;
+      case '--row':
+        options.row = argv[index + 1] ?? null;
         index += 1;
         break;
       default:
@@ -65,32 +55,6 @@ function parseCsv(content) {
   });
 }
 
-function normalize(value) {
-  return String(value ?? '')
-    .trim()
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-}
-
-function buildMatches(rows, criteria) {
-  const normalizedTitle = normalize(criteria.title);
-  const normalizedPartialTitle = normalize(criteria.partialTitle);
-
-  return rows.filter((row) => {
-    const titleMatches = normalizedTitle
-      ? normalize(row.title) === normalizedTitle
-      : true;
-    const partialTitleMatches = normalizedPartialTitle
-      ? normalize(row.title).includes(normalizedPartialTitle)
-      : true;
-
-    return titleMatches && partialTitleMatches;
-  });
-}
-
 async function validateAndReadCsv(csvPath) {
   if (!csvPath) {
     throw new Error('A CSV file path is required.');
@@ -110,24 +74,46 @@ async function validateAndReadCsv(csvPath) {
   return rows;
 }
 
+function parseRowNumber(value) {
+  if (!value) {
+    throw new Error('A CSV row number is required.');
+  }
+
+  const rowNumber = Number(value);
+
+  if (!Number.isInteger(rowNumber)) {
+    throw new Error('CSV row number must be an integer.');
+  }
+
+  if (rowNumber < 2) {
+    throw new Error('CSV row number must refer to an article row, not the header row.');
+  }
+
+  return rowNumber;
+}
+
+function getArticleByRowNumber(rows, rowNumber) {
+  const article = rows.find((row) => row.rowNumber === rowNumber);
+
+  if (!article) {
+    throw new Error(`No article found at CSV row number: ${rowNumber}`);
+  }
+
+  return {
+    title: article.title,
+    date: article.date,
+    content: article.content,
+  };
+}
+
 async function main() {
   try {
     const options = parseArgs(process.argv.slice(2));
+    const rowNumber = parseRowNumber(options.row);
     const rows = await validateAndReadCsv(options.csv);
-    const matches = buildMatches(rows, {
-      title: options.title,
-      partialTitle: options.partialTitle,
-    });
+    const article = getArticleByRowNumber(rows, rowNumber);
 
-    const output = {
-      matches: matches.map((row) => ({
-        rowNumber: row.rowNumber,
-        title: row.title,
-        date: row.date,
-      })),
-    };
-
-    process.stdout.write(`${JSON.stringify(output)}\n`);
+    process.stdout.write(`${JSON.stringify({ article })}\n`);
   } catch (error) {
     process.stderr.write(`${error.message}\n`);
     process.exitCode = 1;
