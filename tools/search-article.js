@@ -5,10 +5,6 @@ import process from 'node:process';
 import { Readable } from 'node:stream';
 import csvParser from 'csv-parser';
 
-//TODO: do an early test of the flow
-
-//TODO: tools throwing errors: should include rules for handling errors?
-
 function parseArgs(argv) {
 
   const options = {
