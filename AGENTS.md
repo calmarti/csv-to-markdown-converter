@@ -185,6 +185,7 @@ CSV row numbers refer to CSV record numbers, including the header row. Therefore
 ```md
 ---
 title: "{{title}}"
+slug: {{slug}}
 date: {{date}}
 publishedIn: {{newspaper}}
 ---
@@ -195,6 +196,13 @@ publishedIn: {{newspaper}}
 Template values:
 
 * `title`, `date`, and `content` must come from `get-article.js`.
+* `slug` is frontmatter metadata, not a CSV column.
+* Set `slug` from the original article title: keep the title's original  words (do not translate them), use lowercase, remove punctuation, and join the words with `-`.
+
+Example:
+`title`: Se acabó el otoño
+`slug`: se-acabo-el-otono 
+
 * `newspaper` is frontmatter metadata, not a CSV column.
 * Unless the user explicitly provides another newspaper/publication value, set `newspaper` to `El País`.
 * If the user provides another newspaper/publication value, use that exact value for `newspaper`.
