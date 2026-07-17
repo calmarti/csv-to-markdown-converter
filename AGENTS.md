@@ -199,7 +199,7 @@ Template values:
 * `title`, `date`, and `content` must come from `get-article.js`.
 * `slug` is frontmatter metadata, not a CSV column.
 * Set `slug` from the original article title: keep the title's original  words (do not translate them), use lowercase, remove punctuation, and join the words with `-`.
-* `tags` must always be an empty array
+* `tags` must always be an empty array in the frontmatter
 
 Example:
 `title`: Se acabó el otoño
