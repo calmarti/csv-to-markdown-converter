@@ -185,10 +185,10 @@ CSV row numbers refer to CSV record numbers, including the header row. Therefore
 ```md
 ---
 title: "{{title}}"
-slug: {{slug}}
-date: {{date}}
+slug: "{{slug}}"
+date: "{{date}}"
 tags: {{tags}}
-publishedIn: {{newspaper}}
+publishedIn: "{{newspaper}}"
 ---
 
 {{content}}
@@ -197,6 +197,7 @@ publishedIn: {{newspaper}}
 Template values:
 
 * `title`, `date`, and `content` must come from `get-article.js`.
+* Wrap every frontmatter value in double quotes except `tags`.
 * `slug` is frontmatter metadata, not a CSV column.
 * Set `slug` from the original article title: keep the title's original  words (do not translate them), use lowercase, remove punctuation, and join the words with `-`.
 * `tags` must always be an empty array in the frontmatter
